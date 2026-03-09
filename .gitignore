@@ -48,5 +48,9 @@ infra/.terraform.lock.hcl
 # Docker
 .docker/
 
+# Frontend
+node_modules/
+frontend/dist/
+
 # Claude Code
 .claude/
