@@ -184,14 +184,16 @@ async def _list_protocols(assay: str | None, limit: int) -> None:
 )
 @click.option("--notes", default=None, help="Optional submission notes.")
 @click.option("--submitted-by", default="cli", help="Submitter identity.")
+@click.option("--force", is_flag=True, help="Allow duplicate submissions to create a comparison review.")
 def submit(
     source_url: str | None,
     source_file: Path | None,
     notes: str | None,
     submitted_by: str,
+    force: bool,
 ) -> None:
     """Submit a source URL or local file and run ingestion immediately."""
-    asyncio.run(_submit(source_url, source_file, notes, submitted_by))
+    asyncio.run(_submit(source_url, source_file, notes, submitted_by, force))
 
 
 async def _submit(
@@ -199,18 +201,41 @@ async def _submit(
     source_file: Path | None,
     notes: str | None,
     submitted_by: str,
+    force: bool,
 ) -> None:
-    from protoclaw.services.ingestion import create_submission_and_ingest
+    from protoclaw.db.engine import async_session
+    from protoclaw.db.repositories import get_protocol_by_slug
+    from protoclaw.services.ingestion import (
+        build_protocol_draft,
+        create_submission_and_ingest,
+    )
 
     if bool(source_url) == bool(source_file):
         raise click.UsageError("Provide exactly one of --url or --file.")
 
     source_ref = source_url or source_file.resolve().as_uri()
     await _ensure_schema()
+    draft_payload = await build_protocol_draft(source_ref=source_ref)
+
+    async with async_session() as session:
+        existing = await get_protocol_by_slug(
+            session, draft_payload["protocol"]["slug"]
+        )
+
+    if existing is not None and not force:
+        click.echo(
+            "Duplicate protocol detected for existing slug "
+            f"'{draft_payload['protocol']['slug']}'.\n"
+            "Re-run with `--force` to create a draft comparison review instead of skipping."
+        )
+        return
+
     result = await create_submission_and_ingest(
         source_ref,
         notes=notes,
         submitted_by=submitted_by,
+        draft_payload=draft_payload,
+        force_duplicate_review=force,
     )
     click.echo(yaml.safe_dump(result, sort_keys=False))
 
@@ -242,6 +267,85 @@ async def _list_submissions(limit: int) -> None:
             f"{submission['id']} {submission['status']:<10} "
             f"{submission['source_url']}"
         )
+
+
+@cli.command(name="prune")
+@click.option("--keep-slug", default=None, help="Protocol slug to keep.")
+@click.option("--keep-name", default=None, help="Exact protocol name to keep.")
+def prune_protocols(keep_slug: str | None, keep_name: str | None) -> None:
+    """Delete all protocols except one retained record."""
+    asyncio.run(_prune_protocols(keep_slug, keep_name))
+
+
+async def _prune_protocols(
+    keep_slug: str | None,
+    keep_name: str | None,
+) -> None:
+    from protoclaw.db.engine import async_session
+    from protoclaw.db.repositories import (
+        get_protocol_by_name,
+        get_protocol_by_slug,
+        prune_database_to_protocol,
+    )
+
+    if bool(keep_slug) == bool(keep_name):
+        raise click.UsageError("Provide exactly one of --keep-slug or --keep-name.")
+
+    await _ensure_schema()
+
+    async with async_session() as session:
+        keep_row = (
+            await get_protocol_by_slug(session, keep_slug)
+            if keep_slug
+            else await get_protocol_by_name(session, keep_name or "")
+        )
+        if keep_row is None:
+            label = keep_slug or keep_name
+            raise click.ClickException(f"Protocol not found: {label}")
+
+        result = await prune_database_to_protocol(session, keep_protocol_id=keep_row.id)
+        await session.commit()
+
+    click.echo(yaml.safe_dump(result, sort_keys=False))
+
+
+@cli.command(name="draft")
+@click.option("--url", "source_url", default=None, help="Protocol source URL.")
+@click.option(
+    "--file",
+    "source_file",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Local protocol file path, including PDF.",
+)
+@click.option("--text", "source_text", default=None, help="Inline source text.")
+def draft_protocol(
+    source_url: str | None,
+    source_file: Path | None,
+    source_text: str | None,
+) -> None:
+    """Extract a structured protocol draft with Gemini without writing to the database."""
+    asyncio.run(_draft_protocol(source_url, source_file, source_text))
+
+
+async def _draft_protocol(
+    source_url: str | None,
+    source_file: Path | None,
+    source_text: str | None,
+) -> None:
+    from protoclaw.services.ingestion import build_protocol_draft
+
+    choices = [bool(source_url), bool(source_file), bool(source_text)]
+    if sum(choices) != 1:
+        raise click.UsageError("Provide exactly one of --url, --file, or --text.")
+
+    if source_text is not None:
+        result = await build_protocol_draft(source_text=source_text)
+    else:
+        source_ref = source_url or source_file.resolve().as_uri()
+        result = await build_protocol_draft(source_ref=source_ref)
+
+    click.echo(yaml.safe_dump(result, sort_keys=False, allow_unicode=False))
 
 
 if __name__ == "__main__":

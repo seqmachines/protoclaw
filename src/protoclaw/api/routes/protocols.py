@@ -2,12 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from protoclaw.agents.formatter.tools import generate_seqspec_yaml
 from protoclaw.api.dependencies import get_db
 from protoclaw.db import repositories as repo
-from protoclaw.models import Protocol
-from protoclaw.services.protocols import row_to_protocol
+from protoclaw.services.protocols import (
+    protocol_to_seqspec,
+    protocol_to_explorer,
+    protocol_tsv_summary,
+    row_to_protocol,
+)
 
 router = APIRouter()
+
 @router.get("")
 async def list_protocols(
     assay_family: str | None = Query(None),
@@ -61,6 +67,18 @@ async def get_read_geometry(
     return protocol.read_geometry.model_dump(mode="json")
 
 
+@router.get("/{slug}/explorer")
+async def get_protocol_explorer(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    row = await repo.get_protocol_by_slug(db, slug)
+    if not row:
+        raise HTTPException(status_code=404, detail="Protocol not found")
+    protocol = row_to_protocol(row)
+    return protocol_to_explorer(protocol).model_dump(mode="json")
+
+
 @router.get("/{slug}/seqspec")
 async def get_seqspec(
     slug: str,
@@ -71,13 +89,46 @@ async def get_seqspec(
     if not row:
         raise HTTPException(status_code=404, detail="Protocol not found")
 
+    protocol = row_to_protocol(row)
     seqspec_row = await repo.get_protocol_seqspec(db, row.id)
-    if not seqspec_row:
-        raise HTTPException(status_code=404, detail="Seqspec artifact not found")
+    if seqspec_row:
+        if format == "yaml":
+            return PlainTextResponse(seqspec_row.content_yaml, media_type="application/x-yaml")
+        return seqspec_row.content_json
 
+    seqspec = protocol_to_seqspec(protocol)
     if format == "yaml":
-        return PlainTextResponse(seqspec_row.content_yaml, media_type="application/x-yaml")
-    return seqspec_row.content_json
+        return PlainTextResponse(generate_seqspec_yaml(seqspec), media_type="application/x-yaml")
+    return seqspec.model_dump(mode="json")
+
+
+@router.get("/{slug}/exports/parser-config")
+async def get_parser_config(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    row = await repo.get_protocol_by_slug(db, slug)
+    if not row:
+        raise HTTPException(status_code=404, detail="Protocol not found")
+    protocol = row_to_protocol(row)
+    return protocol.parser_config or {
+        "generator": "protoclaw.agents.parser.tools.extract_seqspec",
+        "normalizer": "protoclaw.agents.normalizer.tools.seqspec_to_protocol",
+        "schema": "SeqSpec",
+        "notes": "No protocol-specific parser config stored.",
+    }
+
+
+@router.get("/{slug}/exports/tsv")
+async def get_protocol_tsv(
+    slug: str,
+    db: AsyncSession = Depends(get_db),
+):
+    row = await repo.get_protocol_by_slug(db, slug)
+    if not row:
+        raise HTTPException(status_code=404, detail="Protocol not found")
+    protocol = row_to_protocol(row)
+    return PlainTextResponse(protocol_tsv_summary(protocol), media_type="text/tab-separated-values")
 
 
 @router.get("/{slug}/versions")

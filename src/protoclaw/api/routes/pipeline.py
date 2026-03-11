@@ -1,9 +1,18 @@
-from fastapi import APIRouter, Query
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
+from pydantic import BaseModel, Field
 
 from protoclaw.agents.source_scout.tools import load_seed_sources
-from protoclaw.services.ingestion import create_submission_and_ingest
+from protoclaw.services.ingestion import build_protocol_draft, create_submission_and_ingest
 
 router = APIRouter()
+
+
+class DraftRequest(BaseModel):
+    source_url: str | None = Field(default=None, min_length=1)
+    source_text: str | None = Field(default=None, min_length=1)
 
 
 @router.post("/run")
@@ -36,3 +45,37 @@ async def run_pipeline(
         "count": len(results),
         "submissions": results,
     }
+
+
+@router.post("/draft")
+async def draft_protocol(payload: DraftRequest) -> dict:
+    if bool(payload.source_url) == bool(payload.source_text):
+        raise HTTPException(
+            status_code=400,
+            detail="Provide exactly one of source_url or source_text.",
+        )
+    if payload.source_text:
+        return await build_protocol_draft(source_text=payload.source_text)
+    return await build_protocol_draft(source_ref=payload.source_url)
+
+
+@router.post("/draft/upload")
+async def draft_protocol_upload(
+    file: UploadFile = File(...),
+    notes: str | None = Form(None),
+) -> dict:
+    suffix = Path(file.filename or "upload.bin").suffix
+    temp_path: Path | None = None
+    try:
+        with NamedTemporaryFile(delete=False, suffix=suffix, prefix="protoclaw-draft-") as temp:
+            temp.write(await file.read())
+            temp_path = Path(temp.name)
+
+        result = await build_protocol_draft(source_ref=temp_path.resolve().as_uri())
+        if notes:
+            result["notes"] = notes
+        return result
+    finally:
+        await file.close()
+        if temp_path is not None and temp_path.exists():
+            temp_path.unlink(missing_ok=True)

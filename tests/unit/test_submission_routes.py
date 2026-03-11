@@ -14,6 +14,8 @@ def test_upload_submission_route(monkeypatch):
         notes: str | None = None,
         submitted_by: str = "api",
         toolkit=None,
+        force_duplicate_review: bool = False,
+        draft_payload: dict | None = None,
     ) -> dict:
         return {
             "id": "sub-123",

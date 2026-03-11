@@ -20,6 +20,7 @@ class SubmissionCreateRequest(BaseModel):
     source_url: str = Field(min_length=1)
     notes: str | None = None
     submitted_by: str = "api"
+    force: bool = False
 
 
 @router.post("")
@@ -28,6 +29,7 @@ async def create_submission(payload: SubmissionCreateRequest) -> dict:
         payload.source_url,
         notes=payload.notes,
         submitted_by=payload.submitted_by,
+        force_duplicate_review=payload.force,
     )
 
 
@@ -36,6 +38,7 @@ async def upload_submission(
     file: UploadFile = File(...),
     notes: str | None = Form(None),
     submitted_by: str = Form("api-upload"),
+    force: bool = Form(False),
 ) -> dict:
     suffix = Path(file.filename or "upload.bin").suffix
     temp_path: Path | None = None
@@ -48,6 +51,7 @@ async def upload_submission(
             temp_path.resolve().as_uri(),
             notes=notes or f"Uploaded file: {file.filename}",
             submitted_by=submitted_by,
+            force_duplicate_review=force,
         )
     finally:
         await file.close()

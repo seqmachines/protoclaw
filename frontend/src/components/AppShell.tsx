@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { Database, Menu, Upload, X } from 'lucide-react';
+import { Database, GitCompareArrows, Menu, Upload, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/lib/api';
 
 const navItems = [
   { to: '/', label: 'Protocols', icon: Database },
+  { to: '/reviews', label: 'Reviews', icon: GitCompareArrows },
   { to: '/submissions', label: 'Submissions', icon: Upload },
 ];
 

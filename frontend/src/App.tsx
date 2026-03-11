@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import ProtocolsPage from "./pages/ProtocolsPage";
 import ProtocolDetailPage from "./pages/ProtocolDetailPage";
+import ReviewDetailPage from "./pages/ReviewDetailPage";
+import ReviewsPage from "./pages/ReviewsPage";
 import SubmissionsPage from "./pages/SubmissionsPage";
 import NotFound from "./pages/NotFound";
 
@@ -21,6 +23,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<ProtocolsPage />} />
             <Route path="/protocols/:slug" element={<ProtocolDetailPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/reviews/:reviewId" element={<ReviewDetailPage />} />
             <Route path="/submissions" element={<SubmissionsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -25,6 +25,8 @@ class PublishResult(BaseModel):
 
 async def publish_protocol(
     protocol_json: str,
+    *,
+    allow_duplicate_review: bool = False,
 ) -> dict:
     """Publish or queue a protocol based on its confidence score.
 
@@ -52,6 +54,28 @@ async def publish_protocol(
         # Check if protocol already exists
         existing = await get_protocol_by_slug(session, protocol.slug)
         if existing:
+            if allow_duplicate_review:
+                review = ReviewRequest(
+                    protocol_id=existing.id,
+                    confidence_score=protocol.confidence_score,
+                    extraction_notes=(
+                        f"Duplicate submission for existing protocol '{protocol.slug}'. "
+                        "Review the extracted draft against the current protocol before applying changes."
+                    ),
+                )
+                await create_review_request(session, review)
+                await session.commit()
+                return {
+                    "slug": protocol.slug,
+                    "action": "duplicate_review_requested",
+                    "confidence_level": level,
+                    "confidence_score": protocol.confidence_score,
+                    "review_request_id": str(review.id),
+                    "message": (
+                        f"Duplicate review requested for '{protocol.slug}' "
+                        f"(confidence: {protocol.confidence_score:.2f})"
+                    ),
+                }
             return {
                 "slug": protocol.slug,
                 "action": "skipped",

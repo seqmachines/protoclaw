@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AlertCircle, ExternalLink, UploadCloud } from 'lucide-react';
 
 import { ErrorState, EmptyState, LoadingState } from '@/components/States';
@@ -104,6 +105,7 @@ export default function SubmissionsPage() {
                   <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Status</th>
                   <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Protocol</th>
                   <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Run stage</th>
+                  <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Review</th>
                   <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Created</th>
                   <th className="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Error</th>
                 </tr>
@@ -131,6 +133,18 @@ export default function SubmissionsPage() {
                     </td>
                     <td className="px-4 py-4 align-top font-mono text-xs text-muted-foreground">
                       {submission.latest_run?.stage ?? '-'}
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      {submission.review_request_id ? (
+                        <Link
+                          to={`/reviews/${submission.review_request_id}`}
+                          className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.18em] text-foreground hover:text-muted-foreground"
+                        >
+                          compare
+                        </Link>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-4 align-top text-xs text-muted-foreground">
                       {formatDate(submission.created_at)}
@@ -179,6 +193,16 @@ export default function SubmissionsPage() {
                   <div className="border border-border bg-background p-3">
                     <p className="data-label mb-2">Run stage</p>
                     <p className="font-mono text-xs text-muted-foreground">{submission.latest_run?.stage ?? '-'}</p>
+                  </div>
+                  <div className="border border-border bg-background p-3">
+                    <p className="data-label mb-2">Review</p>
+                    {submission.review_request_id ? (
+                      <Link to={`/reviews/${submission.review_request_id}`} className="font-mono text-xs text-foreground hover:text-muted-foreground">
+                        open comparison
+                      </Link>
+                    ) : (
+                      <p className="font-mono text-xs text-muted-foreground">-</p>
+                    )}
                   </div>
                   <div className="border border-border bg-background p-3">
                     <p className="data-label mb-2">Submitted by</p>

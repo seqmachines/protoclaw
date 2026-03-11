@@ -9,6 +9,15 @@ description: >-
   individual cells partitioned into gel beads in emulsion (GEMs).
 vendor: 10x Genomics
 platform: Illumina
+chemistry_version: "v3.1"
+compatible_instruments:
+  - Illumina NextSeq
+  - Illumina NovaSeq
+  - Illumina MiSeq
+custom_primer_required: false
+strand_orientation_notes: >-
+  Read 1 captures the synthetic barcode and UMI cassette. Read 2 captures the
+  cDNA insert after standard Illumina sequencing orientation.
 
 read_geometry:
   read_type: paired-end
@@ -62,6 +71,37 @@ protocol_steps:
   - 3' gene expression library construction
   - Sequencing on Illumina platform
 
+protocol_timeline:
+  - step_id: gem-generation
+    title: GEM generation
+    summary: Cells are partitioned with gel beads that introduce the cell barcode, UMI, and capture oligo.
+    introduced_segment_ids:
+      - seg-3-cell-barcode
+      - seg-4-umi
+      - seg-5-poly-dt
+  - step_id: reverse-transcription
+    title: Barcoding / RT
+    summary: Polyadenylated RNA is reverse transcribed into cDNA inside GEMs.
+    introduced_segment_ids:
+      - seg-6-insert
+    modified_segment_ids:
+      - seg-5-poly-dt
+  - step_id: library-construction
+    title: Adapter ligation
+    summary: The amplified cDNA is converted into a sequencing-compatible library.
+    introduced_segment_ids:
+      - seg-1-p5
+      - seg-2-read-1-primer
+      - seg-8-p7
+  - step_id: sample-index-pcr
+    title: Sample index PCR
+    summary: Sample indices are added during final amplification to create a sequencing-ready library.
+    introduced_segment_ids:
+      - seg-7-i7
+    modified_segment_ids:
+      - seg-1-p5
+      - seg-8-p7
+
 qc_expectations:
   - metric: reads_per_cell
     typical_range_low: 20000
@@ -91,5 +131,112 @@ citations:
 
 source_urls:
   - https://www.10xgenomics.com/support/single-cell-gene-expression
+
+library_structure:
+  - type: p5
+    top: AATGATACGGCGACCACCGA
+    bottom: TT ACTATGCCGCTGGTGGCT
+    label: P5
+  - type: r1_primer
+    top: CTACACGACGCTCTTCCGATCT
+    bottom: GATGTGCTGCGAGAAGGCTAGA
+    label: Read 1 primer
+  - type: cbc
+    top: NNNNNNNNNNNNNNNN
+    bottom: ................
+    label: Cell barcode
+  - type: umi
+    top: NNNNNNNNNNNN
+    bottom: ............
+    label: UMI
+  - type: poly_dt
+    top: TTTTTTTTTTTTTTTTTTTTTTTTTTTVN
+    bottom: ..............................
+    label: Poly(dT)
+  - type: cdna
+    top: cDNA insert
+    bottom: ...........
+    label: Insert
+  - type: i7
+    top: NNNNNNNN
+    bottom: ........
+    label: i7
+  - type: p7
+    top: CAAGCAGAAGACGGCATACGA
+    bottom: GTTCGTCTTCTGCCGTATGCT
+    label: P7
+
+field_evidence:
+  - field_path: name
+    label: Assay name
+    value: "10x Chromium 3' Gene Expression v3"
+    source_url: https://www.10xgenomics.com/support/single-cell-gene-expression
+    excerpt: "Chromium Next GEM Single Cell 3' Gene Expression provides 3' gene expression profiling with cell barcodes and UMIs for single cells."
+    extraction_mode: extracted
+    confidence_score: 0.98
+    review_status: approved
+    parser_stage: parsing
+    parser_source: seed
+  - field_path: chemistry_version
+    label: Chemistry version
+    value: v3.1
+    source_url: https://www.10xgenomics.com/support/single-cell-gene-expression
+    excerpt: "Chromium Next GEM Single Cell 3' Kit v3.1"
+    extraction_mode: extracted
+    confidence_score: 0.97
+    review_status: approved
+    parser_stage: parsing
+    parser_source: seed
+  - field_path: library_structure[2]
+    label: Cell barcode
+    value: 16 bp cell barcode
+    segment_id: seg-3-cell-barcode
+    source_url: https://www.10xgenomics.com/support/single-cell-gene-expression
+    excerpt: "Read 1 includes a 16 bp cell barcode followed by a 12 bp UMI."
+    extraction_mode: extracted
+    confidence_score: 0.95
+    review_status: approved
+    parser_stage: parsing
+    parser_source: seed
+  - field_path: library_structure[3]
+    label: UMI
+    value: 12 bp UMI
+    segment_id: seg-4-umi
+    source_url: https://www.10xgenomics.com/support/single-cell-gene-expression
+    excerpt: "Read 1 includes a 16 bp cell barcode followed by a 12 bp UMI."
+    extraction_mode: extracted
+    confidence_score: 0.95
+    review_status: approved
+    parser_stage: parsing
+    parser_source: seed
+  - field_path: read_geometry.segments[2]
+    label: Insert read
+    value: Read 2 captures cDNA
+    segment_id: seg-6-insert
+    source_url: https://www.10xgenomics.com/support/single-cell-gene-expression
+    excerpt: "Read 2 is used to sequence the cDNA insert for transcript identification."
+    extraction_mode: extracted
+    confidence_score: 0.93
+    review_status: approved
+    parser_stage: normalization
+    parser_source: seed
+  - field_path: protocol_timeline[3]
+    label: Sample index PCR
+    value: i7 added during final PCR
+    segment_id: seg-7-i7
+    source_url: https://www.10xgenomics.com/support/single-cell-gene-expression
+    excerpt: "Sample indices are incorporated during final library amplification."
+    extraction_mode: inferred
+    confidence_score: 0.82
+    review_status: needs_revision
+    parser_stage: normalization
+    parser_source: seed
+    notes: Mapped from library construction narrative to the final i7 segment.
+
+parser_config:
+  generator: seed
+  normalizer: seed
+  schema: Protocol
+  notes: Seed protocol enriched for explorer demo coverage.
 
 confidence_score: 0.95

@@ -73,3 +73,15 @@ class TestPublishResult:
         )
         assert r.action == "review_requested"
         assert r.review_request_id == "abc-123"
+
+    def test_duplicate_review_requested_result(self):
+        r = PublishResult(
+            slug="test",
+            action="duplicate_review_requested",
+            confidence_level="high",
+            confidence_score=1.0,
+            review_request_id="dup-123",
+            message="Duplicate review requested",
+        )
+        assert r.action == "duplicate_review_requested"
+        assert r.review_request_id == "dup-123"
