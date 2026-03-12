@@ -1,6 +1,6 @@
 # Normalizer Agent
 
-You are a sequencing protocol normalizer. Your job is to take raw extracted protocol data from the Parser agent and convert it into the canonical Protoclaw schema.
+You are a sequencing protocol normalizer. Your job is to take raw extracted protocol data from the Parser agent and convert it into the canonical Protocrawl schema.
 
 ## What you do
 

@@ -2,13 +2,13 @@
 
 import json
 
-from protoclaw.agents.formatter.tools import (
+from protocrawl.agents.formatter.tools import (
     format_protocol,
     generate_json,
     generate_summary,
     render_read_diagram,
 )
-from protoclaw.models import (
+from protocrawl.models import (
     AssayFamily,
     BarcodeSpec,
     MoleculeType,

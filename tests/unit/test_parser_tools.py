@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from protoclaw.agents.parser.tools import (
+from protocrawl.agents.parser.tools import (
     ParsedBarcodes,
     ParsedMetadata,
     ParsedReadStructure,
@@ -17,7 +17,7 @@ from protoclaw.agents.parser.tools import (
 @pytest.fixture
 def mock_extract():
     """Patch glm5.extract_structured to return controlled responses."""
-    with patch("protoclaw.agents.parser.tools.glm5") as mock:
+    with patch("protocrawl.agents.parser.tools.glm5") as mock:
         yield mock
 
 

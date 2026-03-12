@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: protoclaw
-      POSTGRES_PASSWORD: protoclaw
-      POSTGRES_DB: protoclaw
+      POSTGRES_USER: protocrawl
+      POSTGRES_PASSWORD: protocrawl
+      POSTGRES_DB: protocrawl
     ports:
       - "5432:5432"
     volumes:

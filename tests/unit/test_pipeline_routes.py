@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from protoclaw.api.routes import pipeline
+from protocrawl.api.routes import pipeline
 
 
 def test_pipeline_draft_route(monkeypatch):

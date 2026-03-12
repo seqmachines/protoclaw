@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from types import SimpleNamespace
 
-from protoclaw.api.dependencies import get_db
-from protoclaw.api.routes import protocols
-from protoclaw.models import (
+from protocrawl.api.dependencies import get_db
+from protocrawl.api.routes import protocols
+from protocrawl.models import (
     AssayFamily,
     FieldEvidence,
     MoleculeType,

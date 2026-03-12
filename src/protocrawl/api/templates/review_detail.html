@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Review: {{ protocol.name }} — Protocrawl{% endblock %}
+{% block content %}
+<h1>Review: {{ protocol.name }}</h1>
+<p class="meta">
+    Slug: {{ protocol.slug }} |
+    Confidence: {{ "%.2f"|format(review.confidence_score) }}
+    {% if review.confidence_score >= 0.60 %}
+        <span class="badge badge-medium">MEDIUM</span>
+    {% else %}
+        <span class="badge badge-low">LOW</span>
+    {% endif %}
+</p>
+
+{% if review.extraction_notes %}
+<div class="card">
+    <h2>Extraction Notes</h2>
+    <p>{{ review.extraction_notes }}</p>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Protocol Summary</h2>
+    <p><strong>Assay Family:</strong> {{ protocol.assay_family }}</p>
+    <p><strong>Molecule Type:</strong> {{ protocol.molecule_type }}</p>
+    {% if protocol.vendor %}<p><strong>Vendor:</strong> {{ protocol.vendor }}</p>{% endif %}
+    {% if protocol.platform %}<p><strong>Platform:</strong> {{ protocol.platform }}</p>{% endif %}
+    <p><strong>Version:</strong> {{ protocol.version }}</p>
+    <p>{{ protocol.description }}</p>
+</div>
+
+<div class="card">
+    <h2>Read Structure</h2>
+    <pre>{{ read_diagram }}</pre>
+</div>
+
+{% if protocol.barcodes %}
+<div class="card">
+    <h2>Barcodes</h2>
+    <table>
+        <thead><tr><th>Role</th><th>Length</th><th>Method</th><th>Whitelist</th></tr></thead>
+        <tbody>
+        {% for bc in protocol.barcodes %}
+            <tr>
+                <td>{{ bc.role }}</td>
+                <td>{{ bc.length }}bp</td>
+                <td>{{ bc.addition_method or '—' }}</td>
+                <td>{{ bc.whitelist_source or '—' }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if protocol.protocol_steps %}
+<div class="card">
+    <h2>Workflow Steps</h2>
+    <ol>
+    {% for step in protocol.protocol_steps %}
+        <li>{{ step }}</li>
+    {% endfor %}
+    </ol>
+</div>
+{% endif %}
+
+{% if protocol.caveats %}
+<div class="card">
+    <h2>Caveats</h2>
+    <ul>
+    {% for caveat in protocol.caveats %}
+        <li>{{ caveat }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Decision</h2>
+    <form method="POST" action="/reviews/{{ review.id }}/decide">
+        <p>
+            <label for="comments">Comments (optional):</label><br>
+            <textarea name="comments" id="comments" rows="3"></textarea>
+        </p>
+        <p style="margin-top: 10px;">
+            <button type="submit" name="decision" value="approved" class="btn btn-approve">Approve &amp; Publish</button>
+            <button type="submit" name="decision" value="rejected" class="btn btn-reject">Reject</button>
+        </p>
+    </form>
+</div>
+{% endblock %}

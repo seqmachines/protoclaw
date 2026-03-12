@@ -1,7 +1,7 @@
 import pytest
 from pydantic import BaseModel
 
-from protoclaw.llm import gemini
+from protocrawl.llm import gemini
 
 
 class _FlexiblePayload(BaseModel):

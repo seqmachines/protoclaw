@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from protoclaw.api.routes import submissions
+from protocrawl.api.routes import submissions
 
 
 def test_upload_submission_route(monkeypatch):

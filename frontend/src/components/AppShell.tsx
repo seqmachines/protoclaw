@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </span>
             <div className="hidden sm:block">
               <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
-                Protoclaw Console
+                Protocrawl Console
               </p>
               <p className="text-sm font-semibold tracking-[0.08em] text-foreground">
                 Sequencing Protocol Registry

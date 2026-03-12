@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Pending Reviews — Protocrawl{% endblock %}
+{% block content %}
+<h1>Pending Reviews</h1>
+
+{% if reviews %}
+<table>
+    <thead>
+        <tr>
+            <th>Protocol</th>
+            <th>Confidence</th>
+            <th>Level</th>
+            <th>Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for review in reviews %}
+        <tr>
+            <td>
+                {% if review.protocol %}
+                    {{ review.protocol.name }}
+                    <br><span class="meta">{{ review.protocol.slug }}</span>
+                {% else %}
+                    <span class="meta">{{ review.protocol_id }}</span>
+                {% endif %}
+            </td>
+            <td>{{ "%.2f"|format(review.confidence_score) }}</td>
+            <td>
+                {% if review.confidence_score >= 0.60 %}
+                    <span class="badge badge-medium">MEDIUM</span>
+                {% else %}
+                    <span class="badge badge-low">LOW</span>
+                {% endif %}
+            </td>
+            <td class="meta">{{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td><a href="/reviews/{{ review.id }}">Review</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No pending reviews. All protocols are either published or haven't been processed yet.</p>
+{% endif %}
+{% endblock %}

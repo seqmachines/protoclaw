@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -e ".[dev]"
-      - run: mypy src/protoclaw/
+      - run: mypy src/protocrawl/
 
   test:
     runs-on: ubuntu-latest

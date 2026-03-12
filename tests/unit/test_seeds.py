@@ -2,7 +2,7 @@ from pathlib import Path
 
 import yaml
 
-from protoclaw.models import Protocol
+from protocrawl.models import Protocol
 
 SEEDS_DIR = Path(__file__).parent.parent.parent / "seeds" / "protocols"
 

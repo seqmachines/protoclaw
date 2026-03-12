@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "protoclaw"
+name = "protocrawl"
 version = "0.1.0"
 description = "Agent-native sequencing protocol knowledge base"
 readme = "README.md"
@@ -42,10 +42,10 @@ dev = [
 ]
 
 [project.scripts]
-protoclaw = "protoclaw.cli:cli"
+protocrawl = "protocrawl.cli:cli"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/protoclaw"]
+packages = ["src/protocrawl"]
 
 [tool.ruff]
 target-version = "py311"

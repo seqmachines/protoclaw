@@ -3,7 +3,7 @@ import uuid
 import pytest
 from pydantic import ValidationError
 
-from protoclaw.models import (
+from protocrawl.models import (
     Adapter,
     AssayFamily,
     BarcodeSpec,

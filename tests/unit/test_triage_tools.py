@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from protoclaw.agents.triage.tools import (
+from protocrawl.agents.triage.tools import (
     CategoryResult,
     RelevanceResult,
     assign_category,
@@ -15,7 +15,7 @@ from protoclaw.agents.triage.tools import (
 
 @pytest.fixture
 def mock_glm5():
-    with patch("protoclaw.agents.triage.tools.glm5") as mock:
+    with patch("protocrawl.agents.triage.tools.glm5") as mock:
         yield mock
 
 

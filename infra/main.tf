@@ -14,8 +14,8 @@ provider "google" {
 
 # --- Cloud SQL (PostgreSQL) ---
 
-resource "google_sql_database_instance" "protoclaw" {
-  name             = "protoclaw-db"
+resource "google_sql_database_instance" "protocrawl" {
+  name             = "protocrawl-db"
   database_version = "POSTGRES_16"
   region           = var.region
 
@@ -25,7 +25,7 @@ resource "google_sql_database_instance" "protoclaw" {
 
     ip_configuration {
       ipv4_enabled = false
-      private_network = google_compute_network.protoclaw.id
+      private_network = google_compute_network.protocrawl.id
     }
 
     backup_configuration {
@@ -37,34 +37,34 @@ resource "google_sql_database_instance" "protoclaw" {
   deletion_protection = true
 }
 
-resource "google_sql_database" "protoclaw" {
-  name     = "protoclaw"
-  instance = google_sql_database_instance.protoclaw.name
+resource "google_sql_database" "protocrawl" {
+  name     = "protocrawl"
+  instance = google_sql_database_instance.protocrawl.name
 }
 
-resource "google_sql_user" "protoclaw" {
-  name     = "protoclaw"
-  instance = google_sql_database_instance.protoclaw.name
+resource "google_sql_user" "protocrawl" {
+  name     = "protocrawl"
+  instance = google_sql_database_instance.protocrawl.name
   password = var.db_password
 }
 
 # --- VPC for Cloud SQL private IP ---
 
-resource "google_compute_network" "protoclaw" {
-  name                    = "protoclaw-network"
+resource "google_compute_network" "protocrawl" {
+  name                    = "protocrawl-network"
   auto_create_subnetworks = true
 }
 
 resource "google_compute_global_address" "private_ip" {
-  name          = "protoclaw-private-ip"
+  name          = "protocrawl-private-ip"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  network       = google_compute_network.protoclaw.id
+  network       = google_compute_network.protocrawl.id
 }
 
 resource "google_service_networking_connection" "private_vpc" {
-  network                 = google_compute_network.protoclaw.id
+  network                 = google_compute_network.protocrawl.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip.name]
 }
@@ -72,7 +72,7 @@ resource "google_service_networking_connection" "private_vpc" {
 # --- Cloud Storage ---
 
 resource "google_storage_bucket" "artifacts" {
-  name          = "${var.project_id}-protoclaw-artifacts"
+  name          = "${var.project_id}-protocrawl-artifacts"
   location      = var.region
   force_destroy = false
 
@@ -90,68 +90,68 @@ resource "google_storage_bucket" "artifacts" {
 
 # --- Artifact Registry for Docker images ---
 
-resource "google_artifact_registry_repository" "protoclaw" {
+resource "google_artifact_registry_repository" "protocrawl" {
   location      = var.region
-  repository_id = "protoclaw"
+  repository_id = "protocrawl"
   format        = "DOCKER"
 }
 
 # --- Service Account ---
 
-resource "google_service_account" "protoclaw" {
-  account_id   = "protoclaw-api"
-  display_name = "Protoclaw API Service Account"
+resource "google_service_account" "protocrawl" {
+  account_id   = "protocrawl-api"
+  display_name = "Protocrawl API Service Account"
 }
 
 resource "google_project_iam_member" "sql_client" {
   project = var.project_id
   role    = "roles/cloudsql.client"
-  member  = "serviceAccount:${google_service_account.protoclaw.email}"
+  member  = "serviceAccount:${google_service_account.protocrawl.email}"
 }
 
 resource "google_project_iam_member" "storage_admin" {
   project = var.project_id
   role    = "roles/storage.objectAdmin"
-  member  = "serviceAccount:${google_service_account.protoclaw.email}"
+  member  = "serviceAccount:${google_service_account.protocrawl.email}"
 }
 
 resource "google_project_iam_member" "vertex_user" {
   project = var.project_id
   role    = "roles/aiplatform.user"
-  member  = "serviceAccount:${google_service_account.protoclaw.email}"
+  member  = "serviceAccount:${google_service_account.protocrawl.email}"
 }
 
 # --- Cloud Run (API) ---
 
 resource "google_cloud_run_v2_service" "api" {
-  name     = "protoclaw-api"
+  name     = "protocrawl-api"
   location = var.region
 
   template {
-    service_account = google_service_account.protoclaw.email
+    service_account = google_service_account.protocrawl.email
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/protoclaw/api:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/protocrawl/api:latest"
 
       ports {
         container_port = 8000
       }
 
       env {
-        name  = "PROTOCLAW_GCP_PROJECT"
+        name  = "PROTOCRAWL_GCP_PROJECT"
         value = var.project_id
       }
       env {
-        name  = "PROTOCLAW_GCP_LOCATION"
+        name  = "PROTOCRAWL_GCP_LOCATION"
         value = var.region
       }
       env {
-        name  = "PROTOCLAW_GCS_BUCKET"
+        name  = "PROTOCRAWL_GCS_BUCKET"
         value = google_storage_bucket.artifacts.name
       }
       env {
-        name  = "PROTOCLAW_DATABASE_URL"
-        value = "postgresql+asyncpg://protoclaw:${var.db_password}@/protoclaw?host=/cloudsql/${google_sql_database_instance.protoclaw.connection_name}"
+        name  = "PROTOCRAWL_DATABASE_URL"
+        value = "postgresql+asyncpg://protocrawl:${var.db_password}@/protocrawl?host=/cloudsql/${google_sql_database_instance.protocrawl.connection_name}"
       }
 
       resources {
@@ -170,7 +170,7 @@ resource "google_cloud_run_v2_service" "api" {
 
     vpc_access {
       network_interfaces {
-        network = google_compute_network.protoclaw.name
+        network = google_compute_network.protocrawl.name
       }
     }
 
@@ -193,7 +193,7 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
 # --- Cloud Scheduler (weekly Source Scout) ---
 
 resource "google_cloud_scheduler_job" "source_scout" {
-  name     = "protoclaw-source-scout"
+  name     = "protocrawl-source-scout"
   schedule = "0 6 * * 1" # Every Monday at 6 AM
   timezone = "America/New_York"
 
@@ -202,7 +202,7 @@ resource "google_cloud_scheduler_job" "source_scout" {
     http_method = "POST"
 
     oidc_token {
-      service_account_email = google_service_account.protoclaw.email
+      service_account_email = google_service_account.protocrawl.email
     }
   }
 }
@@ -214,7 +214,7 @@ output "api_url" {
 }
 
 output "db_connection_name" {
-  value = google_sql_database_instance.protoclaw.connection_name
+  value = google_sql_database_instance.protocrawl.connection_name
 }
 
 output "artifacts_bucket" {
@@ -222,5 +222,5 @@ output "artifacts_bucket" {
 }
 
 output "docker_registry" {
-  value = "${var.region}-docker.pkg.dev/${var.project_id}/protoclaw"
+  value = "${var.region}-docker.pkg.dev/${var.project_id}/protocrawl"
 }

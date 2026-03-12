@@ -1,11 +1,11 @@
 """Tests for normalizer tools."""
 
-from protoclaw.agents.normalizer.tools import (
+from protocrawl.agents.normalizer.tools import (
     _slugify,
     compute_confidence,
     normalize_to_schema,
 )
-from protoclaw.models.enums import AssayFamily, MoleculeType
+from protocrawl.models.enums import AssayFamily, MoleculeType
 
 
 class TestSlugify:

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from protoclaw.agents.source_scout.tools import (
+from protocrawl.agents.source_scout.tools import (
     fetch_page_text,
     get_search_keywords,
     load_seed_sources,
@@ -81,7 +81,7 @@ async def test_fetch_page_text_pdf(httpx_mock, monkeypatch: pytest.MonkeyPatch):
     )
 
     monkeypatch.setattr(
-        "protoclaw.agents.source_scout.tools._extract_pdf_text",
+        "protocrawl.agents.source_scout.tools._extract_pdf_text",
         lambda pdf_bytes, max_chars: (
             "Chromium GEM-X protocol text",
             "Chromium GEM-X User Guide",
@@ -103,7 +103,7 @@ async def test_fetch_page_text_local_pdf(tmp_path, monkeypatch: pytest.MonkeyPat
     pdf_path.write_bytes(b"%PDF-1.4 local fake pdf bytes")
 
     monkeypatch.setattr(
-        "protoclaw.agents.source_scout.tools._extract_pdf_text",
+        "protocrawl.agents.source_scout.tools._extract_pdf_text",
         lambda pdf_bytes, max_chars: (
             "Local PDF protocol text",
             "Local PDF Guide",

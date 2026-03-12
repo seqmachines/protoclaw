@@ -1,4 +1,4 @@
-# Protoclaw
+# Protocrawl
 
 An agent-native system for building a structured knowledge base of sequencing protocols. Six AI agents work in a sequential pipeline to discover, triage, parse, normalize, format, and publish protocol definitions into a canonical schema.
 
@@ -46,7 +46,7 @@ Each protocol captures:
 
 ```bash
 # Clone and install
-git clone <repo-url> && cd protoclaw
+git clone <repo-url> && cd protocrawl
 pip install -e ".[dev]"
 
 # Copy environment config
@@ -60,34 +60,34 @@ docker compose up -d
 alembic upgrade head
 
 # Load seed protocols
-protoclaw seed
+protocrawl seed
 ```
 
 ### CLI Commands
 
 ```bash
 # Load seed protocols into the database
-protoclaw seed --seeds-dir seeds/protocols
+protocrawl seed --seeds-dir seeds/protocols
 
 # List protocols
-protoclaw list
-protoclaw list --assay scRNA-seq
+protocrawl list
+protocrawl list --assay scRNA-seq
 
 # Submit a new protocol source URL and ingest it immediately
-protoclaw submit --url https://example.com/protocol-page --notes "vendor doc"
+protocrawl submit --url https://example.com/protocol-page --notes "vendor doc"
 
 # Submit a local PDF or text file directly
-protoclaw submit --file /path/to/protocol.pdf --notes "local pdf"
+protocrawl submit --file /path/to/protocol.pdf --notes "local pdf"
 
 # List recent submissions
-protoclaw submissions
+protocrawl submissions
 
 # Run the full agent pipeline
-protoclaw run --dry-run          # Preview sources
-protoclaw run                    # Execute pipeline
+protocrawl run --dry-run          # Preview sources
+protocrawl run                    # Execute pipeline
 
 # Start the API server
-protoclaw serve
+protocrawl serve
 ```
 
 ### API Endpoints
@@ -116,15 +116,15 @@ POST /slack/commands                  Slack slash-command endpoint
 Set these env vars in `.env`:
 
 ```bash
-PROTOCLAW_SLACK_SIGNING_SECRET=...
-PROTOCLAW_SLACK_BOT_TOKEN=...
-PROTOCLAW_SLACK_APP_TOKEN=...
+PROTOCRAWL_SLACK_SIGNING_SECRET=...
+PROTOCRAWL_SLACK_BOT_TOKEN=...
+PROTOCRAWL_SLACK_APP_TOKEN=...
 ```
 
 Run the API:
 
 ```bash
-protoclaw serve
+protocrawl serve
 ```
 
 Expose it to Slack locally, for example with ngrok:
@@ -133,7 +133,7 @@ Expose it to Slack locally, for example with ngrok:
 ngrok http 8000
 ```
 
-Create a Slack slash command such as `/protoclaw` and point it to:
+Create a Slack slash command such as `/protocrawl` and point it to:
 
 ```text
 https://<your-public-host>/slack/commands
@@ -142,11 +142,11 @@ https://<your-public-host>/slack/commands
 Then use these command forms in Slack:
 
 ```text
-/protoclaw protocol smart-seq2
-/protoclaw read smart-seq2
-/protoclaw reviews
-/protoclaw review <review-uuid> approve
-/protoclaw review <review-uuid> reject
+/protocrawl protocol smart-seq2
+/protocrawl read smart-seq2
+/protocrawl reviews
+/protocrawl review <review-uuid> approve
+/protocrawl review <review-uuid> reject
 ```
 
 The Slack endpoint currently supports slash-command style interactions. Querying a protocol returns its summary, `read` returns the read diagram, `reviews` lists pending reviews, and `review ... approve|reject` updates review status in the same database used by the API and CLI.
@@ -175,7 +175,7 @@ ruff check src/ tests/
 ruff format src/ tests/
 
 # Type check
-mypy src/protoclaw/
+mypy src/protocrawl/
 ```
 
 ## Deployment
@@ -201,7 +201,7 @@ The `Dockerfile` is production-ready with multi-stage build, non-root user, and 
 ## Project Structure
 
 ```
-src/protoclaw/
+src/protocrawl/
   agents/             # 6 ADK agents (source_scout, triage, parser, normalizer, formatter, publisher)
     root_agent.py     # SequentialAgent pipeline wiring
   api/                # FastAPI app, routes, templates

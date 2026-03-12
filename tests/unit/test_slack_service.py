@@ -5,14 +5,14 @@ import uuid
 
 import pytest
 
-from protoclaw.models import (
+from protocrawl.models import (
     AssayFamily,
     MoleculeType,
     Protocol,
     ReadGeometry,
     ReadType,
 )
-from protoclaw.services import slack as slack_service
+from protocrawl.services import slack as slack_service
 
 
 def _sample_protocol() -> Protocol:
@@ -37,7 +37,7 @@ def _signature(secret: str, timestamp: str, body: bytes) -> str:
 def test_verify_slack_request_accepts_valid_signature():
     secret = "signing-secret"
     timestamp = str(int(time.time()))
-    body = b"command=%2Fprotoclaw&text=reviews"
+    body = b"command=%2Fprotocrawl&text=reviews"
     signature = _signature(secret, timestamp, body)
 
     assert slack_service.verify_slack_request(

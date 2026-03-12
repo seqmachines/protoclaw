@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 from click.testing import CliRunner
 
-from protoclaw import cli
+from protocrawl import cli
 
 
 def test_submit_warns_on_duplicate_without_force(monkeypatch):
@@ -30,18 +30,18 @@ def test_submit_warns_on_duplicate_without_force(monkeypatch):
 
     monkeypatch.setattr(cli, "_ensure_schema", fake_ensure_schema)
     monkeypatch.setattr(
-        "protoclaw.services.ingestion.build_protocol_draft",
+        "protocrawl.services.ingestion.build_protocol_draft",
         fake_build_protocol_draft,
     )
     monkeypatch.setattr(
-        "protoclaw.services.ingestion.create_submission_and_ingest",
+        "protocrawl.services.ingestion.create_submission_and_ingest",
         fake_create_submission_and_ingest,
     )
     monkeypatch.setattr(
-        "protoclaw.db.repositories.get_protocol_by_slug",
+        "protocrawl.db.repositories.get_protocol_by_slug",
         fake_get_protocol_by_slug,
     )
-    monkeypatch.setattr("protoclaw.db.engine.async_session", lambda: _SessionContext())
+    monkeypatch.setattr("protocrawl.db.engine.async_session", lambda: _SessionContext())
 
     result = runner.invoke(cli.cli, ["submit", "--url", "https://example.com/protocol.pdf"])
 
@@ -90,18 +90,18 @@ def test_submit_force_creates_comparison_review(monkeypatch):
 
     monkeypatch.setattr(cli, "_ensure_schema", fake_ensure_schema)
     monkeypatch.setattr(
-        "protoclaw.services.ingestion.build_protocol_draft",
+        "protocrawl.services.ingestion.build_protocol_draft",
         fake_build_protocol_draft,
     )
     monkeypatch.setattr(
-        "protoclaw.services.ingestion.create_submission_and_ingest",
+        "protocrawl.services.ingestion.create_submission_and_ingest",
         fake_create_submission_and_ingest,
     )
     monkeypatch.setattr(
-        "protoclaw.db.repositories.get_protocol_by_slug",
+        "protocrawl.db.repositories.get_protocol_by_slug",
         fake_get_protocol_by_slug,
     )
-    monkeypatch.setattr("protoclaw.db.engine.async_session", lambda: _SessionContext())
+    monkeypatch.setattr("protocrawl.db.engine.async_session", lambda: _SessionContext())
 
     result = runner.invoke(
         cli.cli,

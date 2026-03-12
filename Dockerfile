@@ -24,7 +24,7 @@ COPY --from=builder /install /usr/local
 COPY --chown=app:app src/ src/
 COPY --chown=app:app seeds/ seeds/
 COPY --chown=app:app alembic.ini .
-COPY --chown=app:app src/protoclaw/api/templates/ src/protoclaw/api/templates/
+COPY --chown=app:app src/protocrawl/api/templates/ src/protocrawl/api/templates/
 
 USER app
 
@@ -35,7 +35,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 # Use uvicorn with proper signal handling for Cloud Run
 # Cloud Run sends SIGTERM; uvicorn handles it gracefully
-CMD ["python", "-m", "uvicorn", "protoclaw.api.app:app", \
+CMD ["python", "-m", "uvicorn", "protocrawl.api.app:app", \
      "--host", "0.0.0.0", \
      "--port", "8000", \
      "--workers", "2", \

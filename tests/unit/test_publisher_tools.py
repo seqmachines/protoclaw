@@ -1,14 +1,14 @@
 """Tests for publisher tools — confidence-gated publishing logic."""
 
-from protoclaw.agents.publisher.tools import PublishResult
-from protoclaw.models import (
+from protocrawl.agents.publisher.tools import PublishResult
+from protocrawl.models import (
     AssayFamily,
     MoleculeType,
     Protocol,
     ReadGeometry,
     ReadType,
 )
-from protoclaw.models.enums import ConfidenceLevel
+from protocrawl.models.enums import ConfidenceLevel
 
 
 def _protocol_with_confidence(score: float) -> Protocol:

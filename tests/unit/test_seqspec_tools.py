@@ -1,9 +1,9 @@
 import json
 
-from protoclaw.agents.formatter.tools import generate_seqspec_json, generate_seqspec_yaml
-from protoclaw.agents.normalizer.tools import seqspec_to_protocol
-from protoclaw.models import SeqSpec, SeqSpecRead, SeqSpecRegion
-from protoclaw.models.enums import SegmentRole
+from protocrawl.agents.formatter.tools import generate_seqspec_json, generate_seqspec_yaml
+from protocrawl.agents.normalizer.tools import seqspec_to_protocol
+from protocrawl.models import SeqSpec, SeqSpecRead, SeqSpecRegion
+from protocrawl.models.enums import SegmentRole
 
 
 def _sample_seqspec() -> SeqSpec:
